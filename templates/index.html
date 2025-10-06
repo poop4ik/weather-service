@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Професійний сервіс прогнозу погоди</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span style="font-size: 2.5em;">🌦️</span>
+                <h1>WeatherPro</h1>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Змінити тему">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </header>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" 
+                       id="cityInput" 
+                       class="search-input" 
+                       placeholder="Введіть назву міста (Київ, Львів, Одеса...)" 
+                       autocomplete="off" />
+                <button class="btn" onclick="searchWeather()">
+                    🔍 Пошук
+                </button>
+                <button class="btn btn-secondary btn-icon" onclick="getCurrentLocation()" title="Моє місцезнаходження">
+                    📍
+                </button>
+            </div>
+            
+            <div id="savedCities" class="saved-cities hidden"></div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading hidden">
+            <div class="loading-spinner"></div>
+            <div>Завантаження даних...</div>
+        </div>
+
+        <!-- Error -->
+        <div id="error" class="error-message hidden">
+            <span style="font-size: 1.5em;">⚠️</span>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Weather Content -->
+        <div id="weatherContent" class="hidden">
+            <!-- Current Weather + Air Quality -->
+            <div class="weather-grid">
+                <!-- Current Weather Card -->
+                <div class="weather-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Поточна погода</h2>
+                        <button class="btn btn-icon" onclick="saveCity()" title="Зберегти місто">
+                            ⭐
+                        </button>
+                    </div>
+                    <div class="current-weather-display">
+                        <div class="location" id="location"></div>
+                        <img class="weather-icon-large" id="weatherIconLarge" src="" alt="Weather icon" />
+                        <div class="temperature-main" id="temperatureMain"></div>
+                        <div class="weather-description" id="weatherDesc"></div>
+                        
+                        <div class="weather-details-grid">
+                            <div class="detail-box">
+                                <div class="detail-label">🌡️ Відчувається</div>
+                                <div class="detail-value" id="feelsLike"></div>
+                            </div>
+                            <div class="detail-box">
+                                <div class="detail-label">💧 Вологість</div>
+                                <div class="detail-value" id="humidity"></div>
+                            </div>
+                            <div class="detail-box">
+                                <div class="detail-label">🌪️ Тиск</div>
+                                <div class="detail-value" id="pressure"></div>
+                            </div>
+                            <div class="detail-box">
+                                <div class="detail-label">💨 Вітер</div>
+                                <div class="detail-value" id="windSpeed"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Air Quality Card -->
+                <div class="weather-card" id="airQualityCard">
+                    <div class="card-header">
+                        <h2 class="card-title">Якість повітря</h2>
+                    </div>
+                    <div class="aqi-indicator">
+                        <div class="aqi-circle" id="aqiCircle"></div>
+                        <div class="aqi-info">
+                            <h3 id="aqiLabel"></h3>
+                            <p style="color: #666;">Індекс якості повітря</p>
+                        </div>
+                    </div>
+                    <div class="pollutants" id="pollutants"></div>
+                </div>
+            </div>
+
+            <!-- Temperature Chart -->
+            <div class="weather-card card-full">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Графік температури (48 годин)</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="weather-card card-full">
+                <div class="card-header">
+                    <h2 class="card-title">🕐 Погодинний прогноз</h2>
+                </div>
+                <div class="forecast-container" id="hourlyForecast"></div>
+            </div>
+
+            <!-- Daily Forecast -->
+            <div class="weather-card card-full">
+                <div class="card-header">
+                    <h2 class="card-title">📅 Прогноз на 5 днів</h2>
+                </div>
+                <div class="forecast-container" id="dailyForecast"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding: 20px; color: rgba(255,255,255,0.8);">
+            <p>🌍 Веб-сервіс прогнозу погоди на Google Cloud Run</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Дані від OpenWeatherMap API | Курсова робота 2025</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

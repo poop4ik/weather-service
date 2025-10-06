@@ -1,0 +1,34 @@
+# Файли та папки Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Файли IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Файли оточення
+.env
+.env.local
+
+# Файли операційної системи
+.DS_Store
+Thumbs.db
+
+# Файли git
+.git/
+.gitignore
+
+# Інше
+*.log
+*.pot
+*.pyc
