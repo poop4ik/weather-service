@@ -29,8 +29,8 @@ body.dark-mode {
     color: var(--text-light) !important;
 }
 
-/* Всі текстові елементи білі в темній темі */
-body.dark-mode *:not(.btn):not(.nav-tab):not(.temperature-main) {
+/* Всі текстові елементи білі в темній темі (окрім SVG та кнопок) */
+body.dark-mode *:not(.btn):not(.nav-tab):not(.temperature-main):not(svg):not(svg *) {
     color: var(--text-light) !important;
 }
 
@@ -910,6 +910,16 @@ body.dark-mode .feels-like {
     font-size: 0.85rem;
 }
 
+/* Білий текст в comfort-info у темній темі */
+body.dark-mode .comfort-info h3,
+body.dark-mode .comfort-info p {
+    color: var(--text-light) !important;
+}
+
+body.dark-mode .section-subtitle {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
 /* Pollutants Grid Styles */
 .section-subtitle {
     color: #666;
@@ -973,6 +983,12 @@ body.dark-mode .feels-like {
     font-size: 0.7rem;
     opacity: 0.7;
     color: #666;
+}
+
+/* Білий текст для pollutant в темній темі */
+body.dark-mode .pollutant-name,
+body.dark-mode .pollutant-unit {
+    color: var(--text-light) !important;
 }
 
 /* Color coding for pollutant levels */
@@ -1126,6 +1142,12 @@ body.dark-mode .feels-like {
     margin-bottom: 5px;
 }
 
+/* Білий текст в aqi-info у темній темі */
+body.dark-mode .aqi-info h3,
+body.dark-mode .aqi-info p {
+    color: var(--text-light) !important;
+}
+
 /* Atmospheric Charts */
 .atmospheric-charts {
     display: grid;
@@ -1155,6 +1177,11 @@ body.dark-mode .feels-like {
     stroke-width: 2;
 }
 
+/* Світліший фон кругів у темній темі */
+body.dark-mode .circle-bg {
+    stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
 .circle {
     fill: none;
     stroke-width: 2;
@@ -1163,10 +1190,35 @@ body.dark-mode .feels-like {
 }
 
 .percentage {
-    fill: var(--text-dark);
+    fill: #333333;
     font-size: 0.5em;
     font-weight: bold;
     text-anchor: middle;
+}
+
+/* Білий текст у круглих прогрес-барах в темній темі */
+body.dark-mode .percentage {
+    fill: #ffffff !important;
+}
+
+/* Чорний текст у світлому режимі */
+body:not(.dark-mode) .percentage {
+    fill: #333333 !important;
+}
+
+body.dark-mode .chart-title,
+body.dark-mode .chart-value {
+    color: var(--text-light) !important;
+}
+
+/* Темний текст у світлому режимі */
+body:not(.dark-mode) .chart-title,
+body:not(.dark-mode) .chart-value {
+    color: #333333 !important;
+}
+
+body.dark-mode .aqi-circle {
+    color: white !important;
 }
 
 .chart-label {

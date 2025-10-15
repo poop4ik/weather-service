@@ -1052,6 +1052,33 @@ function toggleTheme() {
     if (currentLat && currentLon) {
         loadWeatherMap(currentLat, currentLon);
     }
+    
+    // Перемалювання всіх графіків з новими кольорами
+    recreateCharts();
+}
+
+// Перемалювання всіх графіків при зміні теми
+function recreateCharts() {
+    // Перемалювання головного температурного графіка
+    if (weeklyForecastData && weeklyForecastData.weekly[selectedDay]) {
+        const dayData = weeklyForecastData.weekly[selectedDay];
+        if (dayData.hourly_data && dayData.hourly_data.length > 0) {
+            createTemperatureChart(dayData.hourly_data);
+        }
+    }
+    
+    // Перемалювання тижневого графіка
+    if (weeklyForecastData && weeklyForecastData.weekly.length > 0) {
+        createHistoryWeekChart();
+    }
+    
+    // Перемалювання денного графіка (якщо потрібно)
+    if (weeklyForecastData && weeklyForecastData.weekly[selectedDay]) {
+        const dayData = weeklyForecastData.weekly[selectedDay];
+        if (dayData.hourly_data && dayData.hourly_data.length > 0) {
+            createHistoryDayChart();
+        }
+    }
 }
 
 // Завантаження теми
