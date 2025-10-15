@@ -26,6 +26,17 @@ body {
 
 body.dark-mode {
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    color: var(--text-light) !important;
+}
+
+/* Всі текстові елементи білі в темній темі */
+body.dark-mode *:not(.btn):not(.nav-tab):not(.temperature-main) {
+    color: var(--text-light) !important;
+}
+
+/* Виняток для primary кольору температури */
+body.dark-mode .temperature-main {
+    color: #88b4ff !important;
 }
 
 /* Dark mode styles for all elements */
@@ -156,6 +167,22 @@ body.dark-mode .activity-grid {
     background: transparent;
 }
 
+/* Всі елементи всередині контейнерів білі */
+body.dark-mode .weather-grid *,
+body.dark-mode .chart-container *,
+body.dark-mode .hourly-forecast *,
+body.dark-mode .air-quality-card *,
+body.dark-mode .tips-section *,
+body.dark-mode .clothing-section *,
+body.dark-mode .activity-grid *,
+body.dark-mode .astronomy-card *,
+body.dark-mode .astronomy-content *,
+body.dark-mode .astronomy-details *,
+body.dark-mode #historyTab *,
+body.dark-mode #mapTab * {
+    color: var(--text-light);
+}
+
 body.dark-mode .weather-icon,
 body.dark-mode .activity-emoji,
 body.dark-mode .clothing-item-icon {
@@ -210,6 +237,11 @@ body.dark-mode .search-section {
 
 body.dark-mode .weather-card {
     background: transparent !important;
+    color: var(--text-light) !important;
+}
+
+body.dark-mode .weather-card * {
+    color: var(--text-light);
 }
 
 body.dark-mode .search-input {
@@ -261,6 +293,44 @@ body.dark-mode .stat-icon {
 body.dark-mode .feels-like-label,
 body.dark-mode .feels-like-value {
     color: var(--text-light) !important;
+}
+
+/* Назва міста в темній темі */
+body.dark-mode .location {
+    color: var(--text-light) !important;
+}
+
+/* Опис погоди в темній темі */
+body.dark-mode .weather-description {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Всі stat елементи */
+body.dark-mode .stat-item,
+body.dark-mode .stat-compact,
+body.dark-mode .stat-box,
+body.dark-mode .info-item,
+body.dark-mode .detail-item,
+body.dark-mode .weather-stat {
+    color: var(--text-light) !important;
+}
+
+/* Всі div та span елементи */
+body.dark-mode div,
+body.dark-mode span,
+body.dark-mode p,
+body.dark-mode label,
+body.dark-mode li,
+body.dark-mode td,
+body.dark-mode th {
+    color: var(--text-light);
+}
+
+/* Температура */
+body.dark-mode .temperature-main,
+body.dark-mode .temp,
+body.dark-mode .temperature {
+    color: #88b4ff !important;
 }
 
 .container {
@@ -718,6 +788,13 @@ header {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Прозорий блок feels-like в темній темі */
+body.dark-mode .feels-like {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
 }
 
 .feels-like-label {

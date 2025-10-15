@@ -102,6 +102,9 @@ async function loadAllWeatherData(city) {
     
     // Встановлюємо поточне місто
     currentCity = city;
+    
+    // Оновлюємо видимість кнопки збереження
+    updateSaveCityButton();
 
     try {
         // Паралельне завантаження даних
@@ -829,6 +832,8 @@ function createTemperatureChart(hourlyData) {
     const temperatures = hourlyData.map(item => convertTemperature(item.main.temp));
     const feelsLike = hourlyData.map(item => convertTemperature(item.main.feels_like));
     const tempSymbol = currentUnits === 'metric' ? '°C' : '°F';
+    
+    const isDark = document.body.classList.contains('dark-mode');
 
     temperatureChart = new Chart(ctx, {
         type: 'line',
@@ -860,11 +865,22 @@ function createTemperatureChart(hourlyData) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 13, weight: 'bold' },
+                        padding: 15
+                    }
                 },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
+                    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+                    titleColor: isDark ? '#ffffff' : '#333333',
+                    bodyColor: isDark ? '#ffffff' : '#333333',
+                    borderColor: '#667eea',
+                    borderWidth: 2,
+                    padding: 12,
                     callbacks: {
                         title: function(context) {
                             const dataIndex = context[0].dataIndex;
@@ -881,9 +897,25 @@ function createTemperatureChart(hourlyData) {
                 y: {
                     beginAtZero: false,
                     ticks: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 12 },
                         callback: function(value) {
                             return value + tempSymbol;
                         }
+                    },
+                    grid: {
+                        color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(102, 126, 234, 0.1)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(102, 126, 234, 0.05)',
+                        drawBorder: false
                     }
                 }
             }
@@ -902,8 +934,23 @@ function saveCity() {
         savedCities = savedCities.slice(0, 5); // Максимум 5 міст
         localStorage.setItem('savedCities', JSON.stringify(savedCities));
         loadSavedCities();
+        updateSaveCityButton();
         showError('Місто збережено!', 'success');
         setTimeout(hideError, 2000);
+    }
+}
+
+// Оновлення видимості кнопки збереження міста
+function updateSaveCityButton() {
+    const saveBtn = document.getElementById('saveCityBtn');
+    if (!saveBtn || !currentCity) return;
+    
+    const savedCities = JSON.parse(localStorage.getItem('savedCities') || '[]');
+    
+    if (savedCities.includes(currentCity)) {
+        saveBtn.style.display = 'none';
+    } else {
+        saveBtn.style.display = 'block';
     }
 }
 
@@ -944,6 +991,7 @@ function removeCity(city) {
     savedCities = savedCities.filter(c => c !== city);
     localStorage.setItem('savedCities', JSON.stringify(savedCities));
     loadSavedCities();
+    updateSaveCityButton();
 }
 
 // Отримання поточного місцезнаходження
@@ -2125,6 +2173,7 @@ function createHistoryDayChart() {
     }
 
     const tempSymbol = currentUnits === 'metric' ? '°C' : '°F';
+    const isDark = document.body.classList.contains('dark-mode');
 
     historyDayChart = new Chart(ctx, {
         type: 'line',
@@ -2156,20 +2205,47 @@ function createHistoryDayChart() {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 13, weight: 'bold' },
+                        padding: 15
+                    }
                 },
                 tooltip: {
                     mode: 'index',
-                    intersect: false
+                    intersect: false,
+                    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+                    titleColor: isDark ? '#ffffff' : '#333333',
+                    bodyColor: isDark ? '#ffffff' : '#333333',
+                    borderColor: '#667eea',
+                    borderWidth: 2,
+                    padding: 12
                 }
             },
             scales: {
                 y: {
                     beginAtZero: false,
                     ticks: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 12 },
                         callback: function(value) {
                             return value + tempSymbol;
                         }
+                    },
+                    grid: {
+                        color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(102, 126, 234, 0.1)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: isDark ? '#ffffff' : '#333333',
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(102, 126, 234, 0.05)',
+                        drawBorder: false
                     }
                 }
             }
