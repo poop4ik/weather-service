@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -20,23 +20,70 @@
             </button>
         </header>
 
+        <!-- Navigation Tabs -->
+        <nav class="main-navigation">
+            <button class="nav-tab active" data-tab="home" onclick="switchTab('home')">
+                🏠 Головна
+            </button>
+            <button class="nav-tab" data-tab="map" onclick="switchTab('map')">
+                🗺️ Карта
+            </button>
+            <button class="nav-tab" data-tab="astronomy" onclick="switchTab('astronomy')">
+                ☀️ Сонце і Місяць
+            </button>
+            <button class="nav-tab" data-tab="history" onclick="switchTab('history')">
+                📊 Графіки
+            </button>
+        </nav>
+
         <!-- Search Section -->
         <div class="search-section">
             <div class="search-box">
-                <input type="text" 
-                       id="cityInput" 
-                       class="search-input" 
-                       placeholder="Введіть назву міста (Київ, Львів, Одеса...)" 
-                       autocomplete="off" />
+          <input type="text" 
+              id="cityInput" 
+              class="search-input" 
+              placeholder="Введіть назву міста (Київ, Львів, Одеса...)" 
+              value="Київ"
+              autocomplete="off" />
                 <button class="btn" onclick="searchWeather()">
                     🔍 Пошук
                 </button>
                 <button class="btn btn-secondary btn-icon" onclick="getCurrentLocation()" title="Моє місцезнаходження">
                     📍
                 </button>
+                <button class="btn btn-secondary btn-icon" onclick="toggleSettings()" title="Налаштування одиниць виміру">
+                    ⚙️
+                </button>
             </div>
             
-            <div id="savedCities" class="saved-cities hidden"></div>
+            <!-- Settings Panel (hidden by default) -->
+            <div id="settingsPanel" class="settings-panel-compact hidden">
+                <div class="settings-compact-grid">
+                    <div class="setting-compact-item">
+                        <label for="tempUnit" class="setting-compact-label">
+                            🌡️ Температура:
+                        </label>
+                        <select id="tempUnit" class="setting-compact-select" onchange="updateUnits()">
+                            <option value="metric">°C</option>
+                            <option value="imperial">°F</option>
+                        </select>
+                    </div>
+                    <div class="setting-compact-item">
+                        <label for="speedUnit" class="setting-compact-label">
+                            💨 Швидкість:
+                        </label>
+                        <select id="speedUnit" class="setting-compact-select" onchange="updateUnits()">
+                            <option value="metric">м/с</option>
+                            <option value="imperial">mph</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="savedCitiesContainer" class="hidden" style="margin-top: 15px;">
+                <div class="saved-cities-label">Збережені міста:</div>
+                <div id="savedCities" class="saved-cities"></div>
+            </div>
         </div>
 
         <!-- Loading -->
@@ -45,93 +92,736 @@
             <div>Завантаження даних...</div>
         </div>
 
-        <!-- Error -->
+        <!-- Error/Success Messages -->
         <div id="error" class="error-message hidden">
             <span style="font-size: 1.5em;">⚠️</span>
             <span id="errorText"></span>
         </div>
 
-        <!-- Weather Content -->
+        <!-- Tab Contents -->
+        <div class="tab-content-wrapper">
+            
+            <!-- HOME TAB -->
+            <div id="tab-home" class="tab-content active">
+                <!-- 7-Day Forecast Selector -->
+                <div class="forecast-selector-section hidden">
+                    <div class="forecast-selector-header">
+                        <h3>📅 Виберіть день для детального прогнозу</h3>
+                        <p>Клікніть на день для перегляду погодинного прогнозу</p>
+                    </div>
+                    <div id="weeklyForecast" class="weekly-forecast-container hidden"></div>
+                </div>
+
+                <!-- Weather Content -->
         <div id="weatherContent" class="hidden">
             <!-- Current Weather + Air Quality -->
             <div class="weather-grid">
                 <!-- Current Weather Card -->
                 <div class="weather-card">
                     <div class="card-header">
-                        <h2 class="card-title">Поточна погода</h2>
+                        <h2 class="card-title">📅 Погода <span id="weather-date-display">сьогодні</span></h2>
                         <button class="btn btn-icon" onclick="saveCity()" title="Зберегти місто">
                             ⭐
                         </button>
                     </div>
                     <div class="current-weather-display">
-                        <div class="location" id="location"></div>
-                        <img class="weather-icon-large" id="weatherIconLarge" src="" alt="Weather icon" />
-                        <div class="temperature-main" id="temperatureMain"></div>
-                        <div class="weather-description" id="weatherDesc"></div>
+                        <!-- Header Info -->
+                        <div class="current-weather-header">
+                            <div class="location" id="location"></div>
+                        </div>
                         
-                        <div class="weather-details-grid">
-                            <div class="detail-box">
-                                <div class="detail-label">🌡️ Відчувається</div>
-                                <div class="detail-value" id="feelsLike"></div>
+                        <!-- Main Weather Display -->
+                        <div class="current-weather-main">
+                            <div class="weather-visual">
+                                <img class="weather-icon-large" id="current-icon" src="" alt="Weather icon" />
                             </div>
-                            <div class="detail-box">
-                                <div class="detail-label">💧 Вологість</div>
-                                <div class="detail-value" id="humidity"></div>
+                            <div class="weather-primary">
+                                <div class="temperature-main" id="current-temp"></div>
+                                <div class="weather-description" id="current-description"></div>
+                                <div class="feels-like">
+                                    <span class="feels-like-label">Відчувається як</span>
+                                    <span class="feels-like-value" id="current-feels-like">--°</span>
+                                </div>
                             </div>
-                            <div class="detail-box">
-                                <div class="detail-label">🌪️ Тиск</div>
-                                <div class="detail-value" id="pressure"></div>
+                        </div>
+                        
+                        <!-- Weather Stats Grid -->
+                        <div class="current-weather-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">🌪️</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Тиск</div>
+                                    <div class="stat-value" id="pressure">-- hPa</div>
+                                </div>
                             </div>
-                            <div class="detail-box">
-                                <div class="detail-label">💨 Вітер</div>
-                                <div class="detail-value" id="windSpeed"></div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">☀️</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">УФ-індекс</div>
+                                    <div class="stat-value" id="uv-index">--</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">🌧️</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Дощ</div>
+                                    <div class="stat-value" id="rain-probability">--%</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Air Quality Card -->
+                <!-- Air Quality & Atmospheric Conditions Card -->
                 <div class="weather-card" id="airQualityCard">
                     <div class="card-header">
-                        <h2 class="card-title">Якість повітря</h2>
+                        <h2 class="card-title">🌬️ Атмосферні умови та якість повітря</h2>
+                        <div class="forecast-subtitle" id="airQualitySubtitle">Дані для обраного дня</div>
                     </div>
-                    <div class="aqi-indicator">
-                        <div class="aqi-circle" id="aqiCircle"></div>
-                        <div class="aqi-info">
-                            <h3 id="aqiLabel"></h3>
-                            <p style="color: #666;">Індекс якості повітря</p>
+                    
+                    <!-- Main AQI and Comfort Indicators -->
+                    <div class="aqi-comfort-row">
+                        <div class="aqi-main-indicator">
+                            <div class="aqi-circle" id="aqiCircle"></div>
+                            <div class="aqi-info">
+                                <h3 id="aqiLabel"></h3>
+                                <p style="color: #666;">Якість повітря</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comfort-main-indicator">
+                            <div class="comfort-circle">
+                                <div class="comfort-emoji">🌤️</div>
+                            </div>
+                            <div class="comfort-info">
+                                <h3 id="comfort-level">--</h3>
+                                <p style="color: #666;" id="comfort-description">Рівень комфорту</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="pollutants" id="pollutants"></div>
+
+                    <!-- Circular Progress Charts -->
+                    <div class="atmospheric-charts">
+                        <div class="chart-item">
+                            <div class="circular-progress" id="visibilityChart">
+                                <svg class="circular-chart" viewBox="0 0 36 36">
+                                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="circle" id="visibilityCircle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <text x="18" y="20.35" class="percentage" id="visibilityPercent">0%</text>
+                                </svg>
+                            </div>
+                            <div class="chart-label">
+                                <div class="chart-icon">👁️</div>
+                                <div class="chart-title">Видимість</div>
+                                <div class="chart-value" id="visibilityValue">-- км</div>
+                            </div>
+                        </div>
+
+                        <div class="chart-item">
+                            <div class="circular-progress" id="cloudinessChart">
+                                <svg class="circular-chart" viewBox="0 0 36 36">
+                                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="circle" id="cloudinessCircle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <text x="18" y="20.35" class="percentage" id="cloudinessPercent">0%</text>
+                                </svg>
+                            </div>
+                            <div class="chart-label">
+                                <div class="chart-icon">☁️</div>
+                                <div class="chart-title">Хмарність</div>
+                                <div class="chart-value" id="cloudinessValue">--%</div>
+                            </div>
+                        </div>
+
+                        <div class="chart-item">
+                            <div class="circular-progress" id="humidityChart">
+                                <svg class="circular-chart" viewBox="0 0 36 36">
+                                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="circle" id="humidityCircle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <text x="18" y="20.35" class="percentage" id="humidityPercent">0%</text>
+                                </svg>
+                            </div>
+                            <div class="chart-label">
+                                <div class="chart-icon">💧</div>
+                                <div class="chart-title">Вологість</div>
+                                <div class="chart-value" id="humidityValue">--%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Pollutants -->
+                    <div class="pollutants-section">
+                        <h4 class="section-subtitle">🔬 Забруднювачі повітря</h4>
+                        <div class="pollutants-grid">
+                            <div class="pollutant-item" id="pm25-item">
+                                <div class="pollutant-name">PM2.5</div>
+                                <div class="pollutant-value" id="pm25-value">--</div>
+                                <div class="pollutant-unit">μg/m³</div>
+                            </div>
+                            <div class="pollutant-item" id="pm10-item">
+                                <div class="pollutant-name">PM10</div>
+                                <div class="pollutant-value" id="pm10-value">--</div>
+                                <div class="pollutant-unit">μg/m³</div>
+                            </div>
+                            <div class="pollutant-item" id="no2-item">
+                                <div class="pollutant-name">NO₂</div>
+                                <div class="pollutant-value" id="no2-value">--</div>
+                                <div class="pollutant-unit">μg/m³</div>
+                            </div>
+                            <div class="pollutant-item" id="o3-item">
+                                <div class="pollutant-name">O₃</div>
+                                <div class="pollutant-value" id="o3-value">--</div>
+                                <div class="pollutant-unit">μg/m³</div>
+                            </div>
+                            <div class="pollutant-item" id="co-item">
+                                <div class="pollutant-name">CO</div>
+                                <div class="pollutant-value" id="co-value">--</div>
+                                <div class="pollutant-unit">μg/m³</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Temperature Chart -->
-            <div class="weather-card card-full">
+            <!-- Sun & Moon Info and Additional Weather Details -->
+            <div class="weather-grid" style="margin-top: 30px;">
+                <!-- Sun & Moon Card -->
+                <div class="weather-card">
+                    <div class="card-header">
+                        <h2 class="card-title">🌅 Сонце і Місяць</h2>
+                    </div>
+                    <div class="sun-moon-grid">
+                        <div class="sun-moon-item">
+                            <div class="sun-moon-icon">🌅</div>
+                            <div class="sun-moon-info">
+                                <div class="sun-moon-label">Схід сонця</div>
+                                <div class="sun-moon-time" id="sunrise"></div>
+                            </div>
+                        </div>
+                        <div class="sun-moon-item">
+                            <div class="sun-moon-icon">🌇</div>
+                            <div class="sun-moon-info">
+                                <div class="sun-moon-label">Захід сонця</div>
+                                <div class="sun-moon-time" id="sunset"></div>
+                            </div>
+                        </div>
+                        <div class="sun-moon-item">
+                            <div class="sun-moon-icon">☀️</div>
+                            <div class="sun-moon-info">
+                                <div class="sun-moon-label">Тривалість дня</div>
+                                <div class="sun-moon-time" id="dayLength"></div>
+                            </div>
+                        </div>
+                        <div class="sun-moon-item">
+                            <div class="sun-moon-icon">🕐</div>
+                            <div class="sun-moon-info">
+                                <div class="sun-moon-label">Часовий пояс</div>
+                                <div class="sun-moon-time" id="timezone"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Comfort Card -->
+                <div class="weather-card">
+                    <div class="card-header">
+                        <h2 class="card-title">🏠 Комфорт</h2>
+                    </div>
+                    <div class="comfort-grid">
+                        <div class="comfort-item">
+                            <div class="comfort-icon">🌡️</div>
+                            <div class="comfort-info">
+                                <div class="comfort-label">Індекс комфорту</div>
+                                <div class="comfort-value" id="comfortIndex"></div>
+                            </div>
+                        </div>
+                        <div class="comfort-item">
+                            <div class="comfort-icon">💧</div>
+                            <div class="comfort-info">
+                                <div class="comfort-label">Точка роси</div>
+                                <div class="comfort-value" id="dewPoint"></div>
+                            </div>
+                        </div>
+                        <div class="comfort-item">
+                            <div class="comfort-icon">🌪️</div>
+                            <div class="comfort-info">
+                                <div class="comfort-label">Порив вітру</div>
+                                <div class="comfort-value" id="windGust"></div>
+                            </div>
+                        </div>
+                        <div class="comfort-item">
+                            <div class="comfort-icon">🧭</div>
+                            <div class="comfort-info">
+                                <div class="comfort-label">Напрямок вітру</div>
+                                <div class="comfort-value" id="windDirection"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Temperature Chart -->
+            <div class="weather-card card-full" style="margin-top: 30px;">
                 <div class="card-header">
-                    <h2 class="card-title">📊 Графік температури (48 годин)</h2>
+                    <h2 class="card-title">📊 Графік температури (обраний день)</h2>
+                    <div class="forecast-subtitle" id="chartSubtitle">Погодинний графік для обраного дня</div>
                 </div>
                 <div class="chart-container">
                     <canvas id="temperatureChart"></canvas>
                 </div>
             </div>
 
-            <!-- Hourly Forecast -->
-            <div class="weather-card card-full">
+            <!-- Hourly Forecast for Selected Day -->
+            <div class="weather-card card-full" style="margin-top: 30px;">
                 <div class="card-header">
-                    <h2 class="card-title">🕐 Погодинний прогноз</h2>
+                    <h2 class="card-title">🕐 Детальний погодинний прогноз</h2>
+                    <div class="forecast-subtitle" id="hourlySubtitle">Детальна погода на обраний день</div>
                 </div>
-                <div class="forecast-container" id="hourlyForecast"></div>
-            </div>
-
-            <!-- Daily Forecast -->
-            <div class="weather-card card-full">
-                <div class="card-header">
-                    <h2 class="card-title">📅 Прогноз на 5 днів</h2>
-                </div>
-                <div class="forecast-container" id="dailyForecast"></div>
+                <div id="hourlyForecast" class="hourly-forecast-grid"></div>
             </div>
         </div>
+
+        <!-- Activity Recommendations -->
+        <div id="activityRecommendations" class="weather-card card-full hidden" style="margin-top: 40px;">
+            <div class="card-header">
+                <h2 class="card-title">🏃 Рекомендації для активностей</h2>
+                <div class="forecast-subtitle">Оцінка умов для різних видів діяльності</div>
+            </div>
+            <div class="activity-grid">
+                <!-- Running -->
+                <div class="activity-card" id="runningCard">
+                    <div class="activity-header">
+                        <span class="activity-emoji" id="runningEmoji">🏃‍♂️</span>
+                        <h3>Біг</h3>
+                    </div>
+                    <div class="activity-score-container">
+                        <div class="activity-score-circle">
+                            <svg class="score-circle-svg" viewBox="0 0 36 36">
+                                <path class="circle-bg" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="runningCircle" class="circle-progress" stroke-dasharray="0, 100" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="score-text" id="runningScore">--</div>
+                        </div>
+                    </div>
+                    <div class="activity-status" id="runningStatus">Завантаження...</div>
+                    <div class="activity-description" id="runningDescription"></div>
+                </div>
+
+                <!-- Cycling -->
+                <div class="activity-card" id="cyclingCard">
+                    <div class="activity-header">
+                        <span class="activity-emoji" id="cyclingEmoji">🚴‍♂️</span>
+                        <h3>Велоспорт</h3>
+                    </div>
+                    <div class="activity-score-container">
+                        <div class="activity-score-circle">
+                            <svg class="score-circle-svg" viewBox="0 0 36 36">
+                                <path class="circle-bg" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="cyclingCircle" class="circle-progress" stroke-dasharray="0, 100" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="score-text" id="cyclingScore">--</div>
+                        </div>
+                    </div>
+                    <div class="activity-status" id="cyclingStatus">Завантаження...</div>
+                    <div class="activity-description" id="cyclingDescription"></div>
+                </div>
+
+                <!-- Fishing -->
+                <div class="activity-card" id="fishingCard">
+                    <div class="activity-header">
+                        <span class="activity-emoji" id="fishingEmoji">🎣</span>
+                        <h3>Риболовля</h3>
+                    </div>
+                    <div class="activity-score-container">
+                        <div class="activity-score-circle">
+                            <svg class="score-circle-svg" viewBox="0 0 36 36">
+                                <path class="circle-bg" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="fishingCircle" class="circle-progress" stroke-dasharray="0, 100" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="score-text" id="fishingScore">--</div>
+                        </div>
+                    </div>
+                    <div class="activity-status" id="fishingStatus">Завантаження...</div>
+                    <div class="activity-description" id="fishingDescription"></div>
+                </div>
+
+                <!-- Agriculture -->
+                <div class="activity-card" id="agricultureCard">
+                    <div class="activity-header">
+                        <span class="activity-emoji" id="agricultureEmoji">🌾</span>
+                        <h3>Сільське господарство</h3>
+                    </div>
+                    <div class="activity-score-container">
+                        <div class="activity-score-circle">
+                            <svg class="score-circle-svg" viewBox="0 0 36 36">
+                                <path class="circle-bg" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="agricultureCircle" class="circle-progress" stroke-dasharray="0, 100" d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="score-text" id="agricultureScore">--</div>
+                        </div>
+                    </div>
+                    <div class="activity-status" id="agricultureStatus">Завантаження...</div>
+                    <div class="activity-description" id="agricultureDescription"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Tips (merged with clothing) -->
+        <div id="weatherRecommendations" class="weather-card card-full hidden" style="margin-top: 40px;">
+            <div class="card-header">
+                <h2 class="card-title">📝 Рекомендації</h2>
+                <div class="forecast-subtitle">Корисні поради на основі поточних погодних умов</div>
+            </div>
+            
+            <!-- Clothing Recommendations Section -->
+            <div class="clothing-section" id="clothingRecommendations">
+                <h3 class="section-heading">👕 Рекомендації одягу</h3>
+                <div class="clothing-content">
+                    <div class="clothing-main">
+                        <div class="clothing-description" id="clothingDescription">Завантаження...</div>
+                        <div class="clothing-temp-range" id="clothingTempRange"></div>
+                    </div>
+                    <div class="clothing-items" id="clothingItems"></div>
+                </div>
+            </div>
+            
+            <!-- General Weather Tips -->
+            <div class="tips-section" style="margin-top: 30px;">
+                <h3 class="section-heading">🌤️ Загальні поради</h3>
+                <div id="weatherTips" class="weather-tips-container"></div>
+            </div>
+        </div>
+
+            </div>
+            <!-- END HOME TAB -->
+
+            <!-- MAP TAB -->
+            <div id="tab-map" class="tab-content">
+                <div class="tab-header hidden">
+                    <h2>🗺️ Інтерактивна погодна карта</h2>
+                    <p>Карта опадів та погодних умов у реальному часі</p>
+                </div>
+                
+                <div id="weatherMapSection" class="weather-card card-full hidden">
+                    <div id="weatherMap" style="height: 600px; border-radius: 10px; overflow: hidden; position: relative;">
+                        <iframe 
+                            id="mapFrame" 
+                            frameborder="0" 
+                            style="width: 100%; height: 100%;"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            <!-- END MAP TAB -->
+
+            <!-- ASTRONOMY TAB -->
+            <div id="tab-astronomy" class="tab-content">
+                <div class="tab-header hidden">
+                    <h2>☀️ Астрономічні дані</h2>
+                    <p>Сонце, Місяць та астрономічні події</p>
+                </div>
+
+                <!-- Day Selector for Astronomy -->
+                <div class="forecast-selector-section hidden">
+                    <div class="forecast-selector-header">
+                        <h3>📅 Виберіть день</h3>
+                    </div>
+                    <div id="astronomyWeeklyForecast" class="weekly-forecast-container hidden"></div>
+                </div>
+
+                <div class="astronomy-grid hidden">
+                    <!-- Sun Card -->
+                    <div class="weather-card astronomy-card">
+                        <div class="card-header">
+                            <h3 class="card-title">☀️ Сонце</h3>
+                        </div>
+                        <div class="astronomy-content">
+                            <div class="astronomy-visual sun-visual">
+                                <div class="sun-icon">☀️</div>
+                                <div class="sun-arc"></div>
+                            </div>
+                            <div class="astronomy-details">
+                                <div class="astro-item">
+                                    <span class="astro-label">🌅 Схід:</span>
+                                    <span class="astro-value" id="astroSunrise">--:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🌇 Захід:</span>
+                                    <span class="astro-value" id="astroSunset">--:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">⏱️ Тривалість:</span>
+                                    <span class="astro-value" id="astroDayLength">--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🕐 Зараз:</span>
+                                    <span class="astro-value" id="astroCurrentTime">--:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">☀️ Прогрес:</span>
+                                    <span class="astro-value" id="astroSolarProgress">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Moon Card -->
+                    <div class="weather-card astronomy-card">
+                        <div class="card-header">
+                            <h3 class="card-title">🌙 Місяць</h3>
+                        </div>
+                        <div class="astronomy-content">
+                            <div class="astronomy-visual moon-visual">
+                                <div class="moon-icon" id="moonPhaseIcon">🌕</div>
+                            </div>
+                            <div class="astronomy-details">
+                                <div class="astro-item">
+                                    <span class="astro-label">🌜 Схід:</span>
+                                    <span class="astro-value" id="astroMoonrise">--:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🌛 Захід:</span>
+                                    <span class="astro-value" id="astroMoonset">--:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🌗 Фаза:</span>
+                                    <span class="astro-value" id="astroMoonPhase">--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">💫 Світло:</span>
+                                    <span class="astro-value" id="astroMoonIllumination">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Golden Hour Card -->
+                    <div class="weather-card astronomy-card">
+                        <div class="card-header">
+                            <h3 class="card-title">📸 Золота година</h3>
+                        </div>
+                        <div class="astronomy-content">
+                            <div class="astronomy-visual golden-hour-visual">
+                                <div class="golden-hour-icon">🌅</div>
+                            </div>
+                            <div class="astronomy-details">
+                                <div class="astro-item">
+                                    <span class="astro-label">🌄 Ранок:</span>
+                                    <span class="astro-value" id="astroGoldenMorning">--:-- - --:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🌆 Вечір:</span>
+                                    <span class="astro-value" id="astroGoldenEvening">--:-- - --:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🔵 Синя (ранок):</span>
+                                    <span class="astro-value" id="astroBlueHourMorning">--:-- - --:--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🔵 Синя (вечір):</span>
+                                    <span class="astro-value" id="astroBlueHourEvening">--:-- - --:--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UV Index Card -->
+                    <div class="weather-card astronomy-card">
+                        <div class="card-header">
+                            <h3 class="card-title">☀️ УФ-індекс</h3>
+                        </div>
+                        <div class="astronomy-content">
+                            <div class="astronomy-visual uv-visual">
+                                <div class="uv-gauge">
+                                    <div class="uv-value" id="astroUvValue">--</div>
+                                    <div class="uv-label" id="astroUvLabel">Помірний</div>
+                                </div>
+                            </div>
+                            <div class="astronomy-details">
+                                <div class="astro-item">
+                                    <span class="astro-label">⚠️ Небезпека:</span>
+                                    <span class="astro-value" id="astroUvDanger">--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">🕶️ Захист:</span>
+                                    <span class="astro-value" id="astroUvProtection">--</span>
+                                </div>
+                                <div class="astro-item">
+                                    <span class="astro-label">⏰ Пік:</span>
+                                    <span class="astro-value" id="astroUvPeak">12:00 - 16:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END ASTRONOMY TAB -->
+
+            <!-- HISTORY TAB -->
+            <div id="tab-history" class="tab-content">
+                <div class="tab-header hidden">
+                    <h2>📊 Графіки прогнозу погоди</h2>
+                    <p>Візуалізація прогнозу на наступні дні</p>
+                </div>
+
+                <!-- Day Selector for History -->
+                <div class="forecast-selector-section hidden">
+                    <div class="forecast-selector-header">
+                        <h3>📅 Виберіть день</h3>
+                    </div>
+                    <div id="historyWeeklyForecast" class="weekly-forecast-container hidden"></div>
+                </div>
+
+                <div class="history-charts-grid hidden">
+                    <!-- Week Chart -->
+                    <div class="weather-card history-chart-card">
+                        <div class="card-header">
+                            <h3 class="card-title">📅 Прогноз на 6 днів</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="historyWeekChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Temperature Chart for Selected Day -->
+                    <div class="weather-card history-chart-card">
+                        <div class="card-header">
+                            <h3 class="card-title">🌡️ Температура на обраний день</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="historyDayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END HISTORY TAB -->
+
+            <!-- AGRICULTURE TAB -->
+            <div id="tab-agriculture" class="tab-content">
+                <div class="tab-header">
+                    <h2>🌾 Сільськогосподарські дані</h2>
+                    <p>Інформація для фермерів та аграріїв на основі реальних погодних даних</p>
+                </div>
+
+                <!-- Day Selector for Agriculture -->
+                <div class="forecast-selector-section">
+                    <div class="forecast-selector-header">
+                        <h3>📅 Виберіть день</h3>
+                    </div>
+                    <div id="agricultureWeeklyForecast" class="weekly-forecast-container hidden"></div>
+                </div>
+
+                <div class="agriculture-grid">
+                    <!-- Temperature and Humidity Card -->
+                    <div class="weather-card">
+                        <div class="card-header">
+                            <h3 class="card-title">🌡️ Температурні умови</h3>
+                        </div>
+                        <div class="soil-conditions">
+                            <div class="soil-item">
+                                <span class="soil-icon">🌡️</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Температура повітря</div>
+                                    <div class="soil-value" id="agroTemp">--°C</div>
+                                    <div class="soil-status" id="agroTempStatus">Завантаження...</div>
+                                </div>
+                            </div>
+                            <div class="soil-item">
+                                <span class="soil-icon">💧</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Вологість повітря</div>
+                                    <div class="soil-value" id="agroHumidity">--%</div>
+                                    <div class="soil-status" id="agroHumidityStatus">Завантаження...</div>
+                                </div>
+                            </div>
+                            <div class="soil-item">
+                                <span class="soil-icon">🌡️</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Відчувається як</div>
+                                    <div class="soil-value" id="agroFeelsLike">--°C</div>
+                                    <div class="soil-status">Враховує вітер і вологість</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Precipitation Card -->
+                    <div class="weather-card">
+                        <div class="card-header">
+                            <h3 class="card-title">💧 Опади та вологість</h3>
+                        </div>
+                        <div class="soil-conditions">
+                            <div class="soil-item">
+                                <span class="soil-icon">🌧️</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Опади за день</div>
+                                    <div class="soil-value" id="agroPrecip">-- мм</div>
+                                    <div class="soil-status" id="agroPrecipStatus">Завантаження...</div>
+                                </div>
+                            </div>
+                            <div class="soil-item">
+                                <span class="soil-icon">☁️</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Хмарність</div>
+                                    <div class="soil-value" id="agroClouds">--%</div>
+                                    <div class="soil-status" id="agroCloudsStatus">Завантаження...</div>
+                                </div>
+                            </div>
+                            <div class="soil-item">
+                                <span class="soil-icon">💨</span>
+                                <div class="soil-info">
+                                    <div class="soil-label">Швидкість вітру</div>
+                                    <div class="soil-value" id="agroWind">-- м/с</div>
+                                    <div class="soil-status" id="agroWindStatus">Завантаження...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Working Conditions Card -->
+                    <div class="weather-card card-full">
+                        <div class="card-header">
+                            <h3 class="card-title">🚜 Умови для польових робіт</h3>
+                        </div>
+                        <div class="frost-warning" id="workingConditions">
+                            <div class="frost-status no-frost">
+                                <span class="frost-icon">✅</span>
+                                <div class="frost-text">
+                                    <h4 id="workingConditionsTitle">Завантаження...</h4>
+                                    <p id="workingConditionsDesc">Аналіз погодних умов...</p>
+                                </div>
+                            </div>
+                            <div class="frost-details" id="workingConditionsDetails">
+                                <p>🌡️ Температура: <span id="workingTemp">--°C</span></p>
+                                <p>💧 Опади: <span id="workingPrecip">-- мм</span></p>
+                                <p>� Вітер: <span id="workingWind">-- м/с</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END AGRICULTURE TAB -->
+
+        </div>
+        <!-- END TAB CONTENT WRAPPER -->
 
         <!-- Footer -->
         <div style="text-align: center; margin-top: 40px; padding: 20px; color: rgba(255,255,255,0.8);">
